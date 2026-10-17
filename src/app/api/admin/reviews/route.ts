@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ReviewModel } from "@/models/Review";
 
@@ -20,5 +21,6 @@ export async function POST(req: Request) {
     active: true,
     order: count,
   });
+  revalidateTag("reviews", "max");
   return NextResponse.json(review, { status: 201 });
 }

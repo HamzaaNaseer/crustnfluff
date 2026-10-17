@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { connection } from "next/server";
+import { cacheLife, cacheTag } from "next/cache";
 import { Gallery } from "@/components/Gallery";
 import { Hero } from "@/components/hero/Hero";
 import { Testimonials } from "@/components/Testimonials";
@@ -9,11 +9,13 @@ import { areas } from "@/lib/site";
 import { OCCASIONS, toLabel } from "@/lib/taxonomy";
 import { CakeModel } from "@/models/Cake";
 
-// Homepage reads live cake data (hero order, occasion showcase) on every
-// request, so it can't be statically prerendered — render it on demand.
-export const instant = false;
-
+// Cached for a day and tagged "cakes" — admin writes call revalidateTag("cakes")
+// so edits show up immediately instead of waiting for the day to elapse.
 async function getHeroCakes() {
+  "use cache";
+  cacheTag("cakes");
+  cacheLife({ revalidate: 86400, expire: 86400 * 7 });
+
   await connectToDatabase();
   const cakes = await CakeModel.find({ active: true })
     .sort({ order: 1, createdAt: -1 })
@@ -24,6 +26,10 @@ async function getHeroCakes() {
 }
 
 async function getOccasionShowcase() {
+  "use cache";
+  cacheTag("cakes");
+  cacheLife({ revalidate: 86400, expire: 86400 * 7 });
+
   await connectToDatabase();
   const results = await Promise.all(
     OCCASIONS.map(async (occasion) => {
@@ -38,7 +44,6 @@ async function getOccasionShowcase() {
 }
 
 export default async function Home() {
-  await connection();
   const [heroCakes, occasionShowcase] = await Promise.all([getHeroCakes(), getOccasionShowcase()]);
 
   return (
