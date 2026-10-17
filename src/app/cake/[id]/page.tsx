@@ -7,6 +7,10 @@ import { site } from "@/lib/site";
 import { toLabel } from "@/lib/taxonomy";
 import { CakeModel } from "@/models/Cake";
 
+// Looks up by dynamic [id] against live data — render per request rather
+// than prerendering every cake at build time.
+export const instant = false;
+
 async function getCake(id: string) {
   await connectToDatabase();
   const cake = await CakeModel.findOne({ _id: id, active: true }).lean().catch(() => null);

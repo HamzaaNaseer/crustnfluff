@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/gallery" },
 };
 
+// Reads the ?occasion= query string per request, so it can't be prerendered.
+export const instant = false;
+
 export default async function GalleryPage({
   searchParams,
 }: {

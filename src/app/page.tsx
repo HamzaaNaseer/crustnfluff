@@ -9,8 +9,11 @@ import { areas } from "@/lib/site";
 import { OCCASIONS, toLabel } from "@/lib/taxonomy";
 import { CakeModel } from "@/models/Cake";
 
+// Homepage reads live cake data (hero order, occasion showcase) on every
+// request, so it can't be statically prerendered — render it on demand.
+export const instant = false;
+
 async function getHeroCakes() {
-  await connection();
   await connectToDatabase();
   const cakes = await CakeModel.find({ active: true })
     .sort({ order: 1, createdAt: -1 })
@@ -35,6 +38,7 @@ async function getOccasionShowcase() {
 }
 
 export default async function Home() {
+  await connection();
   const [heroCakes, occasionShowcase] = await Promise.all([getHeroCakes(), getOccasionShowcase()]);
 
   return (
