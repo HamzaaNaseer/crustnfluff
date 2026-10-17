@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { connectToDatabase } from "@/lib/mongodb";
 import { CakeModel } from "@/models/Cake";
 
@@ -19,5 +20,6 @@ export async function PATCH(req: Request) {
     })),
   );
 
+  revalidateTag("cakes", "max");
   return NextResponse.json({ ok: true, updated: updates.length });
 }

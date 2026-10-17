@@ -5,13 +5,18 @@ import { OrderButton } from "@/components/OrderButton";
 import { connectToDatabase } from "@/lib/mongodb";
 import { site } from "@/lib/site";
 import { toLabel } from "@/lib/taxonomy";
+import { cacheLife, cacheTag } from "next/cache";
 import { CakeModel } from "@/models/Cake";
 
-// Looks up by dynamic [id] against live data — render per request rather
-// than prerendering every cake at build time.
+// The page itself reads the dynamic [id] param, so it can't be prerendered —
+// render the shell per request. The DB lookup inside stays cached (above).
 export const instant = false;
 
 async function getCake(id: string) {
+  "use cache";
+  cacheTag("cakes");
+  cacheLife({ revalidate: 86400, expire: 86400 * 7 });
+
   await connectToDatabase();
   const cake = await CakeModel.findOne({ _id: id, active: true }).lean().catch(() => null);
   return cake;

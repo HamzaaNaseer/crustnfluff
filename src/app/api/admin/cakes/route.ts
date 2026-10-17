@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { cloudinary } from "@/lib/cloudinary";
 import { connectToDatabase } from "@/lib/mongodb";
 import { CakeModel } from "@/models/Cake";
@@ -43,5 +44,6 @@ export async function POST(req: Request) {
     active: false,
   });
 
+  revalidateTag("cakes", "max");
   return NextResponse.json(cake, { status: 201 });
 }

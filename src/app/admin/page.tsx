@@ -27,6 +27,7 @@ export default function AdminDashboard() {
   const [cakes, setCakes] = useState<AdminCake[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [refreshingCache, setRefreshingCache] = useState(false);
 
   const [title, setTitle] = useState("");
   const [productType, setProductType] = useState<string>("cake");
@@ -96,6 +97,12 @@ export default function AdminDashboard() {
     router.push("/admin/login");
   }
 
+  async function handleRefreshCache() {
+    setRefreshingCache(true);
+    await fetch("/api/admin/cache/invalidate", { method: "POST" });
+    setRefreshingCache(false);
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <div className="mb-8 flex items-center justify-between">
@@ -104,6 +111,14 @@ export default function AdminDashboard() {
           <Link href="/admin/reviews" className="text-sm text-cocoa underline">
             Manage reviews
           </Link>
+          <button
+            onClick={handleRefreshCache}
+            disabled={refreshingCache}
+            title="The live site caches for up to a day — edits here already refresh it automatically, this is just a manual safety net."
+            className="rounded-full border border-rose/40 px-3 py-1.5 text-xs font-medium disabled:opacity-60"
+          >
+            {refreshingCache ? "Refreshing…" : "Force refresh live site"}
+          </button>
           <button onClick={handleLogout} className="text-sm text-ink/60 underline">
             Sign out
           </button>
